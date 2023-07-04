@@ -1,112 +1,78 @@
--- phpMyAdmin SQL Dump
--- version 5.2.0
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: Feb 13, 2023 at 06:34 PM
--- Server version: 10.4.27-MariaDB
--- PHP Version: 8.2.0
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+GO
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
+-- Database: hcu_food
+
+-- Table structure for table 'customers'
+CREATE TABLE [customers] (
+  [id] int IDENTITY(1,1) NOT NULL,
+  [username] varchar(255) NOT NULL,
+  [email] varchar(255) NOT NULL,
+  [password] varchar(255) NOT NULL,
+  [user_type] varchar(10) NOT NULL DEFAULT 'customer',
+  [created_at] datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Dumping data for table 'customers'
+INSERT INTO [customers] ([username], [email], [password], [user_type], [created_at]) VALUES
+('22mcmc34', 'priyanka@gmail.com', '123456', 'admin', '2023-02-13 07:34:00'),
+('22mcmc37', 'shivani@gmail.com', '123456', 'admin', '2023-02-13 07:35:48');
+
+-- (rest of the data)
+
+-- Table structure for table 'order'
+CREATE TABLE [order] (
+  [id] int IDENTITY(1,1) NOT NULL,
+  [user_name] varchar(49) NOT NULL,
+  [pizza_quantity] int NOT NULL,
+  [burger_quantity] int NOT NULL,
+  [sandwich_quantity] int NOT NULL,
+  [drinks_quantity] int NOT NULL,
+  [total_amt] int NOT NULL
+);
+
+-- Dumping data for table 'order'
+INSERT INTO [order] ([user_name], [pizza_quantity], [burger_quantity], [sandwich_quantity], [drinks_quantity], [total_amt]) VALUES
+('22mcmc14', 4, 4, 6, 8, 118),
+('22mcmc06', 5, 4, 3, 2, 87);
 
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+-- (rest of the data)
 
---
--- Database: `hcu_food`
---
-
--- --------------------------------------------------------
-
---
--- Table structure for table `customers`
---
-
-CREATE TABLE `customers` (
-  `id` int(11) NOT NULL,
-  `username` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `user_type` varchar(10) NOT NULL DEFAULT 'customer',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `customers`
---
-
-INSERT INTO `customers` (`id`, `username`, `email`, `password`, `user_type`, `created_at`) VALUES
-(1, '22mcmc34', 'priyanka@gmail.com', '123456', 'admin', '2023-02-13 07:34:00'),
-(2, '22mcmc37', 'shivani@gmail.com', '123456', 'admin', '2023-02-13 07:35:48'),
-(3, '22mcmc06', 'rohitrai2948@gmail.com', '123456', 'customer', '2023-02-13 16:54:46'),
-(4, '22mcmc28', 'mriduldixit@gmail.com', '123456', 'customer', '2023-02-13 17:14:36'),
-(5, '22mcmc13', 'ashishkr@gmail.com', '123456', 'customer', '2023-02-13 17:16:15');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `orders`
---
-
-CREATE TABLE `orders` (
-  `id` int(11) NOT NULL,
-  `user_name` varchar(49) NOT NULL,
-  `pizza_quantity` int(11) NOT NULL,
-  `burger_quantity` int(11) NOT NULL,
-  `sandwich_quantity` int(11) NOT NULL,
-  `drinks_quantity` int(11) NOT NULL,
-  `total_amt` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`id`, `user_name`, `pizza_quantity`, `burger_quantity`, `sandwich_quantity`, `drinks_quantity`, `total_amt`) VALUES
-(1, '22mcmc06', 2, 1, 3, 5, 57),
-(2, '22mcmc13', 12, 3, 6, 14, 195),
-(3, '22mcmc28', 4, 9, 6, 13, 158);
-
---
 -- Indexes for dumped tables
---
 
---
--- Indexes for table `customers`
---
-ALTER TABLE `customers`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
+-- Indexes for table 'customers'
+ALTER TABLE [customers]
+  ADD PRIMARY KEY ([id]);
 
---
--- Indexes for table `orders`
---
-ALTER TABLE `orders`
-  ADD PRIMARY KEY (`id`);
+-- First, update the existing duplicate value to NULL
+UPDATE [customers] SET [username] = 'new_username' WHERE [username] = '22mcmc34';
 
---
--- AUTO_INCREMENT for dumped tables
---
+-- Then, add the UNIQUE constraint allowing NULL values
+-- Identify the duplicates (if any)
+SELECT [username], COUNT(*) as [DuplicateCount]
+FROM [customers]
+GROUP BY [username]
+HAVING COUNT(*) > 1;
 
---
--- AUTO_INCREMENT for table `customers`
---
-ALTER TABLE `customers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+-- Once you have identified the duplicates, you can delete them or update them to make them unique.
+-- For example, to delete duplicates and keep only one record with the same username:
+WITH CTE AS (
+    SELECT *,
+           ROW_NUMBER() OVER (PARTITION BY [username] ORDER BY [id]) AS [RowNum]
+    FROM [customers]
+)
+DELETE FROM CTE WHERE [RowNum] > 1;
 
---
--- AUTO_INCREMENT for table `orders`
---
-ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-COMMIT;
+-- Add the UNIQUE constraint to the 'username' column
+ALTER TABLE [customers] ADD CONSTRAINT UQ_Username UNIQUE ([username]);
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+ALTER TABLE [customers]
+  ADD UNIQUE ([email]);
+
+-- Indexes for table 'order'
+ALTER TABLE [order]
+  ADD PRIMARY KEY ([id]);
