@@ -1,1 +1,1 @@
-<h2>Canteen-Managemen-tSystem</h2>
+<h2>Canteen-Management-System</h2>
